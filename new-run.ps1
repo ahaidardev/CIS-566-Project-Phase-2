@@ -85,7 +85,7 @@ Set-Content -Path (Join-Path $dest 'PROMPT.md') -Value $prompt -Encoding UTF8
 
 Write-Host "Created $dest"
 Write-Host "Next:"
-Write-Host "  1. git add `"Runs\$name`" ; git commit -m `"$name: original`""
+Write-Host "  1. git add `"Runs\$name`" ; git commit -m `"${name}: original`""
 Write-Host "  2. Open the model in that folder only and paste PROMPT.md"
-Write-Host "  3. git add `"Runs\$name`" ; git commit -m `"$name: refactored`""
+Write-Host "  3. git add `"Runs\$name`" ; git commit -m `"${name}: refactored`""
 Write-Host "  4. Copy WOTDRefactored\ over the full project's Source\WOTDRefactored\, build, run tests, fill scoring.md"
