@@ -29,41 +29,61 @@ void AABaseEnemy::InitializeMovementSettings()
 	{
 		PatrolMovementSettings = DuplicateObject<UAlsMovementSettings>(MovementSettings, this);
 		InvestigationMovementSettings = DuplicateObject<UAlsMovementSettings>(MovementSettings, this);
-		for (auto& Rotation : PatrolMovementSettings->RotationModes)
-			for (auto& StanceSettings : Rotation.Value.Stances)
-				StanceSettings.Value.WalkForwardSpeed = StanceSettings.Value.WalkBackwardSpeed = PatrolWalkSpeed;
-		for (auto& Rotation : InvestigationMovementSettings->RotationModes)
-			for (auto& StanceSettings : Rotation.Value.Stances)
-			{
-				// Keep 100 cm/s above the walking threshold so ALS uses its running gait.
-				StanceSettings.Value.WalkForwardSpeed = StanceSettings.Value.WalkBackwardSpeed =
-					InvestigationJogSpeed * 0.25f;
-				StanceSettings.Value.RunForwardSpeed = StanceSettings.Value.RunBackwardSpeed = InvestigationJogSpeed;
-			}
+		ConfigurePatrolMovementSpeeds();
+		ConfigureInvestigationMovementSpeeds();
 		// Combat gets its own settings; shared ALS assets and noncombat speeds stay intact.
 		MovementSettings = DuplicateObject<UAlsMovementSettings>(MovementSettings, this);
-		for (auto& Rotation : MovementSettings->RotationModes)
-			for (auto& StanceSettings : Rotation.Value.Stances)
-			{
-				auto& CombatGaitSettings = StanceSettings.Value;
-				// Keep the walking threshold below jogging so ALS selects its running gait.
-				CombatGaitSettings.WalkForwardSpeed = CombatGaitSettings.WalkBackwardSpeed = AttackJogSpeed * 0.25f;
-				CombatGaitSettings.RunForwardSpeed = CombatGaitSettings.RunBackwardSpeed = AttackJogSpeed;
-				CombatGaitSettings.SprintSpeed = FMath::Max(CombatGaitSettings.SprintSpeed, AttackJogSpeed);
-			}
+		ConfigureCombatMovementSpeeds();
 		CombatPositioningMovementSettings = DuplicateObject<UAlsMovementSettings>(MovementSettings, this);
 		CombatRoleMovementSettings = DuplicateObject<UAlsMovementSettings>(MovementSettings, this);
-		for (auto& Rotation : CombatPositioningMovementSettings->RotationModes)
-			for (auto& StanceSettings : Rotation.Value.Stances)
-			{
-				auto& CombatGaitSettings = StanceSettings.Value;
-				CombatGaitSettings.bAllowDirectionDependentMovementSpeed = false;
-				CombatGaitSettings.WalkForwardSpeed = CombatGaitSettings.WalkBackwardSpeed = AttackWalkForwardSpeed;
-				CombatGaitSettings.RunForwardSpeed =
-					FMath::Max(CombatGaitSettings.RunForwardSpeed, AttackWalkForwardSpeed);
-				CombatGaitSettings.RunBackwardSpeed =
-					FMath::Max(CombatGaitSettings.RunBackwardSpeed, AttackWalkForwardSpeed);
-				CombatGaitSettings.SprintSpeed = FMath::Max(CombatGaitSettings.SprintSpeed, AttackWalkForwardSpeed);
-			}
+		ConfigureCombatPositioningMovementSpeeds();
 	}
+}
+
+void AABaseEnemy::ConfigurePatrolMovementSpeeds()
+{
+	for (auto& Rotation : PatrolMovementSettings->RotationModes)
+		for (auto& StanceSettings : Rotation.Value.Stances)
+			StanceSettings.Value.WalkForwardSpeed = StanceSettings.Value.WalkBackwardSpeed = PatrolWalkSpeed;
+}
+
+void AABaseEnemy::ConfigureInvestigationMovementSpeeds()
+{
+	for (auto& Rotation : InvestigationMovementSettings->RotationModes)
+		for (auto& StanceSettings : Rotation.Value.Stances)
+		{
+			// Keep 100 cm/s above the walking threshold so ALS uses its running gait.
+			StanceSettings.Value.WalkForwardSpeed = StanceSettings.Value.WalkBackwardSpeed =
+				InvestigationJogSpeed * 0.25f;
+			StanceSettings.Value.RunForwardSpeed = StanceSettings.Value.RunBackwardSpeed = InvestigationJogSpeed;
+		}
+}
+
+void AABaseEnemy::ConfigureCombatMovementSpeeds()
+{
+	for (auto& Rotation : MovementSettings->RotationModes)
+		for (auto& StanceSettings : Rotation.Value.Stances)
+		{
+			auto& CombatGaitSettings = StanceSettings.Value;
+			// Keep the walking threshold below jogging so ALS selects its running gait.
+			CombatGaitSettings.WalkForwardSpeed = CombatGaitSettings.WalkBackwardSpeed = AttackJogSpeed * 0.25f;
+			CombatGaitSettings.RunForwardSpeed = CombatGaitSettings.RunBackwardSpeed = AttackJogSpeed;
+			CombatGaitSettings.SprintSpeed = FMath::Max(CombatGaitSettings.SprintSpeed, AttackJogSpeed);
+		}
+}
+
+void AABaseEnemy::ConfigureCombatPositioningMovementSpeeds()
+{
+	for (auto& Rotation : CombatPositioningMovementSettings->RotationModes)
+		for (auto& StanceSettings : Rotation.Value.Stances)
+		{
+			auto& CombatGaitSettings = StanceSettings.Value;
+			CombatGaitSettings.bAllowDirectionDependentMovementSpeed = false;
+			CombatGaitSettings.WalkForwardSpeed = CombatGaitSettings.WalkBackwardSpeed = AttackWalkForwardSpeed;
+			CombatGaitSettings.RunForwardSpeed =
+				FMath::Max(CombatGaitSettings.RunForwardSpeed, AttackWalkForwardSpeed);
+			CombatGaitSettings.RunBackwardSpeed =
+				FMath::Max(CombatGaitSettings.RunBackwardSpeed, AttackWalkForwardSpeed);
+			CombatGaitSettings.SprintSpeed = FMath::Max(CombatGaitSettings.SprintSpeed, AttackWalkForwardSpeed);
+		}
 }

@@ -31,35 +31,14 @@ void AABaseEnemy::RefreshStealthLocomotion()
 								((Tree && (Tree == Trees.InvestigateTree || Tree == Trees.SearchingTree ||
 										   Tree == Trees.SuspiciousTree || Tree == Trees.AlertedTree)) ||
 								 Suspicion->GetSuspicion() > 0.0f);
-	UAlsMovementSettings* DesiredSettings = bCombat			 ? MovementSettings.Get()
-											: bInvestigating ? InvestigationMovementSettings.Get()
-															 : PatrolMovementSettings.Get();
-	// The attacking service or role chooses walking for positioning/strafe and jogging for longer moves.
-	if (bCombat && GetDesiredGait() == AlsGaitTags::Walking)
-		DesiredSettings = CombatPositioningMovementSettings.Get();
+	UAlsMovementSettings* DesiredSettings = SelectStealthMovementSettings(bCombat, bInvestigating);
 	if ((bCombat || bHidingSearch) && CombatRole && CombatRoleMovementSettings)
 	{
 		const float Speed = CombatRole->GetActiveMovementSpeed();
 		const FGameplayTag RoleGait = CombatRole->GetActiveMovementGait();
 		if (AppliedCombatRoleSpeed != Speed || AppliedCombatRoleGait != RoleGait)
 		{
-			for (auto& Rotation : CombatRoleMovementSettings->RotationModes)
-				for (auto& StanceSettings : Rotation.Value.Stances)
-				{
-					auto& RoleGaitSettings = StanceSettings.Value;
-					// The mode owns its speed; the chosen gait controls the ALS animation thresholds.
-					RoleGaitSettings.bAllowDirectionDependentMovementSpeed = false;
-					RoleGaitSettings.WalkForwardSpeed = RoleGaitSettings.WalkBackwardSpeed =
-						RoleGait == AlsGaitTags::Walking ? Speed : Speed * 0.25f;
-					RoleGaitSettings.RunForwardSpeed = RoleGaitSettings.RunBackwardSpeed =
-						RoleGait == AlsGaitTags::Sprinting ? Speed * 0.5f : Speed;
-					RoleGaitSettings.SprintSpeed = Speed;
-				}
-			AppliedCombatRoleSpeed = Speed;
-			AppliedCombatRoleGait = RoleGait;
-			// Refresh ALS's cached settings when Blueprint values or the movement mode change.
-			if (AppliedMovementSettings == CombatRoleMovementSettings)
-				AppliedMovementSettings = nullptr;
+			ApplyCombatRoleSpeedsAndInvalidateMovementCache(Speed, RoleGait);
 		}
 		DesiredSettings = CombatRoleMovementSettings.Get();
 	}
@@ -104,6 +83,38 @@ void AABaseEnemy::RefreshStealthLocomotion()
 		SetDesiredRotationMode(AlsRotationModeTags::VelocityDirection);
 	}
 	SetDesiredGait(TreeDesiredGait);
+}
+
+UAlsMovementSettings* AABaseEnemy::SelectStealthMovementSettings(const bool bCombat, const bool bInvestigating)
+{
+	UAlsMovementSettings* DesiredSettings = bCombat			 ? MovementSettings.Get()
+											: bInvestigating ? InvestigationMovementSettings.Get()
+															 : PatrolMovementSettings.Get();
+	// The attacking service or role chooses walking for positioning/strafe and jogging for longer moves.
+	if (bCombat && GetDesiredGait() == AlsGaitTags::Walking)
+		DesiredSettings = CombatPositioningMovementSettings.Get();
+	return DesiredSettings;
+}
+
+void AABaseEnemy::ApplyCombatRoleSpeedsAndInvalidateMovementCache(const float Speed, const FGameplayTag RoleGait)
+{
+	for (auto& Rotation : CombatRoleMovementSettings->RotationModes)
+		for (auto& StanceSettings : Rotation.Value.Stances)
+		{
+			auto& RoleGaitSettings = StanceSettings.Value;
+			// The mode owns its speed; the chosen gait controls the ALS animation thresholds.
+			RoleGaitSettings.bAllowDirectionDependentMovementSpeed = false;
+			RoleGaitSettings.WalkForwardSpeed = RoleGaitSettings.WalkBackwardSpeed =
+				RoleGait == AlsGaitTags::Walking ? Speed : Speed * 0.25f;
+			RoleGaitSettings.RunForwardSpeed = RoleGaitSettings.RunBackwardSpeed =
+				RoleGait == AlsGaitTags::Sprinting ? Speed * 0.5f : Speed;
+			RoleGaitSettings.SprintSpeed = Speed;
+		}
+	AppliedCombatRoleSpeed = Speed;
+	AppliedCombatRoleGait = RoleGait;
+	// Refresh ALS's cached settings when Blueprint values or the movement mode change.
+	if (AppliedMovementSettings == CombatRoleMovementSettings)
+		AppliedMovementSettings = nullptr;
 }
 
 bool AABaseEnemy::SmoothEnemyRotation(float DeltaTime, bool bMoving)

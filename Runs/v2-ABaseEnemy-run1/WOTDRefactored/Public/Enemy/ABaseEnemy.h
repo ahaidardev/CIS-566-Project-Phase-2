@@ -75,7 +75,13 @@ class WOTDREFACTORED_API AABaseEnemy : public AAlsCharacter
 
   private:
 	void InitializeMovementSettings();
+	void ConfigurePatrolMovementSpeeds();
+	void ConfigureInvestigationMovementSpeeds();
+	void ConfigureCombatMovementSpeeds();
+	void ConfigureCombatPositioningMovementSpeeds();
 	void RefreshStealthLocomotion();
+	UAlsMovementSettings* SelectStealthMovementSettings(const bool bCombat, const bool bInvestigating);
+	void ApplyCombatRoleSpeedsAndInvalidateMovementCache(const float Speed, const FGameplayTag RoleGait);
 	bool SmoothEnemyRotation(float DeltaTime, bool bMoving);
 	UPROPERTY(Transient)
 	TObjectPtr<UAlsMovementSettings> PatrolMovementSettings;
