@@ -42,30 +42,30 @@
 
 namespace
 {
-constexpr EAutomationTestFlags RefactoredAuditFlags =
-	EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter;
+	constexpr EAutomationTestFlags RefactoredAuditFlags =
+		EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter;
 
-/**
- * Helper to create a deterministic card item for UInventory testing.
- */
-FCardItem MakeDeterministicCard(const TCHAR* Name, TSubclassOf<UGSCGameplayAbility> AbilityClass,
-								ECardRefillType RefillType = ECardRefillType::Consumable, float RefillInterval = 2.0f)
-{
-	FCardItem Card;
-	Card.CardName = FName(Name);
-	Card.AbilityClass = AbilityClass;
-	Card.RefillType = RefillType;
-	Card.RefillInterval = RefillInterval;
-	return Card;
-}
+	/**
+	 * Helper to create a deterministic card item for UInventory testing.
+	 */
+	FCardItem MakeDeterministicCard(const TCHAR *Name, TSubclassOf<UGSCGameplayAbility> AbilityClass,
+									ECardRefillType RefillType = ECardRefillType::Consumable, float RefillInterval = 2.0f)
+	{
+		FCardItem Card;
+		Card.CardName = FName(Name);
+		Card.AbilityClass = AbilityClass;
+		Card.RefillType = RefillType;
+		Card.RefillInterval = RefillInterval;
+		return Card;
+	}
 
-/**
- * Helper to resolve the Source/WOTDRefactored directory for static source-level architecture & readability checks.
- */
-FString GetRefactoredSourceDir()
-{
-	return FPaths::Combine(FPaths::ProjectDir(), TEXT("Source/WOTDRefactored"));
-}
+	/**
+	 * Helper to resolve the Source/WOTDRefactored directory for static source-level architecture & readability checks.
+	 */
+	FString GetRefactoredSourceDir()
+	{
+		return FPaths::Combine(FPaths::ProjectDir(), TEXT("Source/WOTDRefactored"));
+	}
 } // namespace
 
 // =================================================================================================
@@ -75,9 +75,9 @@ FString GetRefactoredSourceDir()
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRefactoredIOEquivalenceInventoryTest,
 								 "WOTD.Refactoring.IOEquivalence.InventoryComponent", RefactoredAuditFlags)
 
-bool FRefactoredIOEquivalenceInventoryTest::RunTest(const FString& Parameters)
+bool FRefactoredIOEquivalenceInventoryTest::RunTest(const FString &Parameters)
 {
-	UInventory* Inventory = NewObject<UInventory>();
+	UInventory *Inventory = NewObject<UInventory>();
 	if (!TestNotNull(TEXT("InventoryComponent instantiates cleanly"), Inventory))
 	{
 		return false;
@@ -93,7 +93,7 @@ bool FRefactoredIOEquivalenceInventoryTest::RunTest(const FString& Parameters)
 			  Inventory->RemoveSelectedCard().CardName, FName(NAME_None));
 
 	// 2. Load distinct ability classes to verify 5-slot active wheel + 15-card total capacity + reserve routing
-	const TArray<UClass*> CardClasses = {
+	const TArray<UClass *> CardClasses = {
 		LoadClass<UGSCGameplayAbility>(nullptr, TEXT("/Game/WOTD/GAS/Abilities/GA_ThrowTranq.GA_ThrowTranq_C")),
 		LoadClass<UGSCGameplayAbility>(nullptr, TEXT("/Game/WOTD/GAS/Abilities/GA_ThrowSoundCard.GA_ThrowSoundCard_C")),
 		LoadClass<UGSCGameplayAbility>(nullptr, TEXT("/Game/WOTD/GAS/Abilities/GA_ThrowSandSmoke.GA_ThrowSandSmoke_C")),
@@ -173,9 +173,9 @@ bool FRefactoredIOEquivalenceInventoryTest::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRefactoredIOEquivalenceAliCharacterTest,
 								 "WOTD.Refactoring.IOEquivalence.AliCharacter", RefactoredAuditFlags)
 
-bool FRefactoredIOEquivalenceAliCharacterTest::RunTest(const FString& Parameters)
+bool FRefactoredIOEquivalenceAliCharacterTest::RunTest(const FString &Parameters)
 {
-	AAliCharacter* Character = NewObject<AAliCharacter>();
+	AAliCharacter *Character = NewObject<AAliCharacter>();
 	if (!TestNotNull(TEXT("AAliCharacter instantiates cleanly"), Character))
 	{
 		return false;
@@ -234,9 +234,9 @@ bool FRefactoredIOEquivalenceAliCharacterTest::RunTest(const FString& Parameters
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRefactoredIOEquivalenceABaseEnemyTest,
 								 "WOTD.Refactoring.IOEquivalence.ABaseEnemy", RefactoredAuditFlags)
 
-bool FRefactoredIOEquivalenceABaseEnemyTest::RunTest(const FString& Parameters)
+bool FRefactoredIOEquivalenceABaseEnemyTest::RunTest(const FString &Parameters)
 {
-	AABaseEnemy* Enemy = NewObject<AABaseEnemy>();
+	AABaseEnemy *Enemy = NewObject<AABaseEnemy>();
 	if (!TestNotNull(TEXT("AABaseEnemy instantiates cleanly"), Enemy))
 	{
 		return false;
@@ -284,10 +284,10 @@ bool FRefactoredIOEquivalenceABaseEnemyTest::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRefactoredIOEquivalenceTrackerEnemyTest,
 								 "WOTD.Refactoring.IOEquivalence.TrackerEnemy", RefactoredAuditFlags)
 
-bool FRefactoredIOEquivalenceTrackerEnemyTest::RunTest(const FString& Parameters)
+bool FRefactoredIOEquivalenceTrackerEnemyTest::RunTest(const FString &Parameters)
 {
 	// 1. Verify ATrackerEnemy CDO & inheritance I/O contract (inherits AABaseEnemy defaults + TrackerEnemy specifics)
-	ATrackerEnemy* DetachedTracker = NewObject<ATrackerEnemy>();
+	ATrackerEnemy *DetachedTracker = NewObject<ATrackerEnemy>();
 	if (!TestNotNull(TEXT("ATrackerEnemy instantiates cleanly"), DetachedTracker))
 	{
 		return false;
@@ -301,7 +301,7 @@ bool FRefactoredIOEquivalenceTrackerEnemyTest::RunTest(const FString& Parameters
 
 	// 2. Verify live World & USquadCoordinatorSubsystem I/O contract for ATrackerEnemy::PingTarget,
 	// perception binding/unbinding, noise cooldown gating, shout filtering, and EndPlay release.
-	UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
+	UWorld *World = UWorld::CreateWorld(EWorldType::Game, false);
 	if (!TestNotNull(TEXT("Transient Game World created for TrackerEnemy test"), World))
 	{
 		return false;
@@ -312,7 +312,7 @@ bool FRefactoredIOEquivalenceTrackerEnemyTest::RunTest(const FString& Parameters
 		World->RemoveFromRoot();
 	};
 
-	USquadCoordinatorSubsystem* Coordinator = World->GetSubsystem<USquadCoordinatorSubsystem>();
+	USquadCoordinatorSubsystem *Coordinator = World->GetSubsystem<USquadCoordinatorSubsystem>();
 	if (!TestNotNull(TEXT("USquadCoordinatorSubsystem exists in World"), Coordinator))
 	{
 		return false;
@@ -321,9 +321,9 @@ bool FRefactoredIOEquivalenceTrackerEnemyTest::RunTest(const FString& Parameters
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	ATrackerEnemy* Tracker = World->SpawnActor<ATrackerEnemy>(ATrackerEnemy::StaticClass(), FVector::ZeroVector,
+	ATrackerEnemy *Tracker = World->SpawnActor<ATrackerEnemy>(ATrackerEnemy::StaticClass(), FVector::ZeroVector,
 															  FRotator::ZeroRotator, SpawnParams);
-	AABaseEnemy* GuardPawn = World->SpawnActor<AABaseEnemy>(AABaseEnemy::StaticClass(), FVector(300.f, 0.f, 0.f),
+	AABaseEnemy *GuardPawn = World->SpawnActor<AABaseEnemy>(AABaseEnemy::StaticClass(), FVector(300.f, 0.f, 0.f),
 															FRotator::ZeroRotator, SpawnParams);
 	if (!TestNotNull(TEXT("Tracker spawns in world"), Tracker) ||
 		!TestNotNull(TEXT("GuardPawn spawns in world"), GuardPawn))
@@ -332,12 +332,12 @@ bool FRefactoredIOEquivalenceTrackerEnemyTest::RunTest(const FString& Parameters
 	}
 
 	// Attach USquadSuspicionComponent to both Tracker (sender) and GuardPawn (eligible receiver)
-	USquadSuspicionComponent* TrackerSquadComp = NewObject<USquadSuspicionComponent>(Tracker);
+	USquadSuspicionComponent *TrackerSquadComp = NewObject<USquadSuspicionComponent>(Tracker);
 	Tracker->AddInstanceComponent(TrackerSquadComp);
 	TrackerSquadComp->RegisterComponent();
 	Coordinator->RegisterMember(TrackerSquadComp);
 
-	USquadSuspicionComponent* GuardSquadComp = NewObject<USquadSuspicionComponent>(GuardPawn);
+	USquadSuspicionComponent *GuardSquadComp = NewObject<USquadSuspicionComponent>(GuardPawn);
 	GuardPawn->AddInstanceComponent(GuardSquadComp);
 	GuardSquadComp->RegisterComponent();
 	Coordinator->RegisterMember(GuardSquadComp);
@@ -355,22 +355,22 @@ bool FRefactoredIOEquivalenceTrackerEnemyTest::RunTest(const FString& Parameters
 	TestEqual(TEXT("Recruited guard enters ETrackerSquadPhase::Searching"),
 			  GuardSquadComp->TrackerPhase, ETrackerSquadPhase::Searching);
 	TestEqual(TEXT("Recruited guard TrackerActor points to Tracker"),
-			  GuardSquadComp->TrackerActor.Get(), static_cast<AActor*>(Tracker));
+			  GuardSquadComp->TrackerActor.Get(), static_cast<AActor *>(Tracker));
 	TestEqual(TEXT("Recruited guard receives exact TrackerSearchLocation"),
 			  GuardSquadComp->TrackerSearchLocation, FirstLeadLocation);
 	const int32 GenAfterFirstPing = GuardSquadComp->TrackerSearchGeneration;
 	TestTrue(TEXT("TrackerSearchGeneration increments to >= 1"), GenAfterFirstPing >= 1);
 
 	// 3. Verify PossessedBy / UnPossessed perception binding & noise lead filtering
-	AAIController* TrackerController = World->SpawnActor<AAIController>(AAIController::StaticClass(), FVector::ZeroVector,
+	AAIController *TrackerController = World->SpawnActor<AAIController>(AAIController::StaticClass(), FVector::ZeroVector,
 																		FRotator::ZeroRotator, SpawnParams);
-	UAIPerceptionComponent* Perception = NewObject<UAIPerceptionComponent>(TrackerController);
+	UAIPerceptionComponent *Perception = NewObject<UAIPerceptionComponent>(TrackerController);
 	TrackerController->AddInstanceComponent(Perception);
 	Perception->ConfigureSense(*NewObject<UAISenseConfig_Sight>(Perception));
 	Perception->ConfigureSense(*NewObject<UAISenseConfig_Hearing>(Perception));
 	Perception->RegisterComponent();
 
-	UModularSuspicionComponent* TrackerSuspicion = NewObject<UModularSuspicionComponent>(Tracker);
+	UModularSuspicionComponent *TrackerSuspicion = NewObject<UModularSuspicionComponent>(Tracker);
 	Tracker->AddInstanceComponent(TrackerSuspicion);
 	TrackerSuspicion->RegisterComponent();
 
@@ -384,8 +384,8 @@ bool FRefactoredIOEquivalenceTrackerEnemyTest::RunTest(const FString& Parameters
 			  GuardSquadComp->TrackerSearchGeneration, GenAfterFirstPing);
 
 	// Squad shout tag ("TargetIdentifiedEnemyShout") must be ignored to prevent feedback loops
-	ACharacter* ExternalNoiseMaker = World->SpawnActor<ACharacter>(ACharacter::StaticClass(), FVector(900.f, 0.f, 0.f),
-																	FRotator::ZeroRotator, SpawnParams);
+	ACharacter *ExternalNoiseMaker = World->SpawnActor<ACharacter>(ACharacter::StaticClass(), FVector(900.f, 0.f, 0.f),
+																   FRotator::ZeroRotator, SpawnParams);
 	FAIStimulus ShoutStimulus(*GetDefault<UAISense_Hearing>(), 1.0f, FVector(900.f, 0.f, 0.f), FVector::ZeroVector);
 	ShoutStimulus.Tag = TEXT("TargetIdentifiedEnemyShout");
 	Perception->OnTargetPerceptionUpdated.Broadcast(ExternalNoiseMaker, ShoutStimulus);
@@ -421,9 +421,9 @@ bool FRefactoredIOEquivalenceTrackerEnemyTest::RunTest(const FString& Parameters
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRefactoredIOEquivalenceCoverComponentTest,
 								 "WOTD.Refactoring.IOEquivalence.CoverComponent", RefactoredAuditFlags)
 
-bool FRefactoredIOEquivalenceCoverComponentTest::RunTest(const FString& Parameters)
+bool FRefactoredIOEquivalenceCoverComponentTest::RunTest(const FString &Parameters)
 {
-	UCoverComponent* Cover = NewObject<UCoverComponent>();
+	UCoverComponent *Cover = NewObject<UCoverComponent>();
 	if (!TestNotNull(TEXT("UCoverComponent instantiates cleanly"), Cover))
 	{
 		return false;
@@ -471,7 +471,7 @@ bool FRefactoredIOEquivalenceCoverComponentTest::RunTest(const FString& Paramete
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRefactoredMinimumRandomizationTest,
 								 "WOTD.Refactoring.Determinism.MinimumRandomization", RefactoredAuditFlags)
 
-bool FRefactoredMinimumRandomizationTest::RunTest(const FString& Parameters)
+bool FRefactoredMinimumRandomizationTest::RunTest(const FString &Parameters)
 {
 	// Part A: Static verification that AliCharacter, ABaseEnemy, InventoryComponent, CoverComponent,
 	// TrackerEnemy, TrackerSquadNodes, and 06_TrackerCoordination.inl contain ZERO RNG calls
@@ -493,17 +493,17 @@ bool FRefactoredMinimumRandomizationTest::RunTest(const FString& Parameters)
 		TEXT("FMath::Rand"), TEXT("FMath::FRand"), TEXT("FMath::SRand"),
 		TEXT("FRandomStream"), TEXT("RandomUnitVector"), TEXT("RandRange"), TEXT("RandHelper")};
 
-	for (const FString& Dir : TargetDirectories)
+	for (const FString &Dir : TargetDirectories)
 	{
 		TArray<FString> Files;
 		IFileManager::Get().FindFiles(Files, *(Dir / TEXT("*.inl")), true, false);
-		for (const FString& FileName : Files)
+		for (const FString &FileName : Files)
 		{
 			const FString FullPath = FPaths::Combine(Dir, FileName);
 			FString Content;
 			if (FFileHelper::LoadFileToString(Content, *FullPath))
 			{
-				for (const FString& Token : ForbiddenTokens)
+				for (const FString &Token : ForbiddenTokens)
 				{
 					TestFalse(*FString::Printf(TEXT("%s contains no random call '%s'"), *FileName, *Token),
 							  Content.Contains(Token));
@@ -512,13 +512,13 @@ bool FRefactoredMinimumRandomizationTest::RunTest(const FString& Parameters)
 		}
 	}
 
-	for (const FString& FilePath : ExplicitTrackerFiles)
+	for (const FString &FilePath : ExplicitTrackerFiles)
 	{
 		FString Content;
 		if (FFileHelper::LoadFileToString(Content, *FilePath))
 		{
 			const FString CleanName = FPaths::GetCleanFilename(FilePath);
-			for (const FString& Token : ForbiddenTokens)
+			for (const FString &Token : ForbiddenTokens)
 			{
 				TestFalse(*FString::Printf(TEXT("Tracker file %s contains no random call '%s'"), *CleanName, *Token),
 						  Content.Contains(Token));
@@ -527,7 +527,7 @@ bool FRefactoredMinimumRandomizationTest::RunTest(const FString& Parameters)
 	}
 
 	// Part B: Verify UBTService_UpdateTrackerFollow sets RandomDeviation = 0.0f for zero tick-interval jitter
-	UBTService_UpdateTrackerFollow* TrackerFollowService = NewObject<UBTService_UpdateTrackerFollow>();
+	UBTService_UpdateTrackerFollow *TrackerFollowService = NewObject<UBTService_UpdateTrackerFollow>();
 	if (TestNotNull(TEXT("UBTService_UpdateTrackerFollow instantiates"), TrackerFollowService))
 	{
 		TestEqual(TEXT("UBTService_UpdateTrackerFollow has deterministic Interval = 0.25f"),
@@ -538,7 +538,7 @@ bool FRefactoredMinimumRandomizationTest::RunTest(const FString& Parameters)
 
 	// Part C: Verify deterministic equidistant guard tie-breaking and staggered formation slot geometry
 	// in USquadCoordinatorSubsystem (06_TrackerCoordination.inl)
-	UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
+	UWorld *World = UWorld::CreateWorld(EWorldType::Game, false);
 	if (TestNotNull(TEXT("World created for TrackerEnemy determinism check"), World))
 	{
 		ON_SCOPE_EXIT
@@ -547,29 +547,29 @@ bool FRefactoredMinimumRandomizationTest::RunTest(const FString& Parameters)
 			World->RemoveFromRoot();
 		};
 
-		USquadCoordinatorSubsystem* Coordinator = World->GetSubsystem<USquadCoordinatorSubsystem>();
+		USquadCoordinatorSubsystem *Coordinator = World->GetSubsystem<USquadCoordinatorSubsystem>();
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-		ATrackerEnemy* Tracker = World->SpawnActor<ATrackerEnemy>(
+		ATrackerEnemy *Tracker = World->SpawnActor<ATrackerEnemy>(
 			ATrackerEnemy::StaticClass(), FVector(0.f, 0.f, 0.f), FRotator::ZeroRotator, SpawnParams);
 		// Two guards placed at the exact same Euclidean distance (500 cm) from the Tracker
-		AABaseEnemy* GuardAlpha = World->SpawnActor<AABaseEnemy>(
+		AABaseEnemy *GuardAlpha = World->SpawnActor<AABaseEnemy>(
 			AABaseEnemy::StaticClass(), FVector(500.f, 0.f, 0.f), FRotator::ZeroRotator, SpawnParams);
-		AABaseEnemy* GuardBeta = World->SpawnActor<AABaseEnemy>(
+		AABaseEnemy *GuardBeta = World->SpawnActor<AABaseEnemy>(
 			AABaseEnemy::StaticClass(), FVector(-500.f, 0.f, 0.f), FRotator::ZeroRotator, SpawnParams);
 
-		USquadSuspicionComponent* TrackerSquad = NewObject<USquadSuspicionComponent>(Tracker);
+		USquadSuspicionComponent *TrackerSquad = NewObject<USquadSuspicionComponent>(Tracker);
 		Tracker->AddInstanceComponent(TrackerSquad);
 		TrackerSquad->RegisterComponent();
 		Coordinator->RegisterMember(TrackerSquad);
 
-		USquadSuspicionComponent* AlphaSquad = NewObject<USquadSuspicionComponent>(GuardAlpha);
+		USquadSuspicionComponent *AlphaSquad = NewObject<USquadSuspicionComponent>(GuardAlpha);
 		GuardAlpha->AddInstanceComponent(AlphaSquad);
 		AlphaSquad->RegisterComponent();
 		Coordinator->RegisterMember(AlphaSquad);
 
-		USquadSuspicionComponent* BetaSquad = NewObject<USquadSuspicionComponent>(GuardBeta);
+		USquadSuspicionComponent *BetaSquad = NewObject<USquadSuspicionComponent>(GuardBeta);
 		GuardBeta->AddInstanceComponent(BetaSquad);
 		BetaSquad->RegisterComponent();
 		Coordinator->RegisterMember(BetaSquad);
@@ -589,8 +589,8 @@ bool FRefactoredMinimumRandomizationTest::RunTest(const FString& Parameters)
 	}
 
 	// Part D: Runtime determinism check on UInventory
-	UInventory* InvA = NewObject<UInventory>();
-	UInventory* InvB = NewObject<UInventory>();
+	UInventory *InvA = NewObject<UInventory>();
+	UInventory *InvB = NewObject<UInventory>();
 	FCardItem AutoCard =
 		MakeDeterministicCard(TEXT("DetCard"), UGSCGameplayAbility::StaticClass(), ECardRefillType::Automatic, 4.5f);
 
@@ -614,10 +614,10 @@ bool FRefactoredMinimumRandomizationTest::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRefactoredProjectAlignmentTest,
 								 "WOTD.Refactoring.Architecture.ComponentAndInlAlignment", RefactoredAuditFlags)
 
-bool FRefactoredProjectAlignmentTest::RunTest(const FString& Parameters)
+bool FRefactoredProjectAlignmentTest::RunTest(const FString &Parameters)
 {
 	// 1. Verify Component-Based Architecture on AAliCharacter
-	AAliCharacter* Player = NewObject<AAliCharacter>();
+	AAliCharacter *Player = NewObject<AAliCharacter>();
 	if (!TestNotNull(TEXT("AAliCharacter created"), Player))
 	{
 		return false;
@@ -635,7 +635,7 @@ bool FRefactoredProjectAlignmentTest::RunTest(const FString& Parameters)
 				Player->FindComponentByClass<UContextualAnimSceneActorComponent>());
 
 	// 2. Verify Component-Based Architecture on AABaseEnemy & ATrackerEnemy subclass alignment
-	ATrackerEnemy* Tracker = NewObject<ATrackerEnemy>();
+	ATrackerEnemy *Tracker = NewObject<ATrackerEnemy>();
 	if (!TestNotNull(TEXT("ATrackerEnemy created"), Tracker))
 	{
 		return false;
@@ -654,8 +654,8 @@ bool FRefactoredProjectAlignmentTest::RunTest(const FString& Parameters)
 	const FString BaseDir = GetRefactoredSourceDir();
 	struct FInlHubExpectation
 	{
-		const TCHAR* HubCppRelativePath;
-		const TCHAR* InlFolderRelativePath;
+		const TCHAR *HubCppRelativePath;
+		const TCHAR *InlFolderRelativePath;
 		int32 ExpectedInlCount;
 	};
 
@@ -668,7 +668,7 @@ bool FRefactoredProjectAlignmentTest::RunTest(const FString& Parameters)
 		{TEXT("Private/StealthSystem/Subsystems/SquadCoordinatorSubsystem.cpp"),
 		 TEXT("Private/StealthSystem/Subsystems/SquadCoordinatorSubsystem"), 7}};
 
-	for (const FInlHubExpectation& Exp : Expectations)
+	for (const FInlHubExpectation &Exp : Expectations)
 	{
 		const FString HubPath = FPaths::Combine(BaseDir, Exp.HubCppRelativePath);
 		const FString InlDir = FPaths::Combine(BaseDir, Exp.InlFolderRelativePath);
@@ -711,7 +711,7 @@ bool FRefactoredProjectAlignmentTest::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRefactoredReadabilityAuditTest,
 								 "WOTD.Refactoring.Readability.ModularityAndDocumentationAudit", RefactoredAuditFlags)
 
-bool FRefactoredReadabilityAuditTest::RunTest(const FString& Parameters)
+bool FRefactoredReadabilityAuditTest::RunTest(const FString &Parameters)
 {
 	const FString BaseDir = GetRefactoredSourceDir();
 	if (!FPaths::DirectoryExists(BaseDir))
@@ -728,11 +728,11 @@ bool FRefactoredReadabilityAuditTest::RunTest(const FString& Parameters)
 		FPaths::Combine(BaseDir, TEXT("Private/Player/Components/CoverComponent")),
 		FPaths::Combine(BaseDir, TEXT("Private/StealthSystem/Subsystems/SquadCoordinatorSubsystem"))};
 
-	for (const FString& Dir : TargetInlDirs)
+	for (const FString &Dir : TargetInlDirs)
 	{
 		TArray<FString> InlFiles;
 		IFileManager::Get().FindFiles(InlFiles, *(Dir / TEXT("*.inl")), true, false);
-		for (const FString& FileName : InlFiles)
+		for (const FString &FileName : InlFiles)
 		{
 			const FString FullPath = FPaths::Combine(Dir, FileName);
 			TArray<FString> Lines;
@@ -757,7 +757,7 @@ bool FRefactoredReadabilityAuditTest::RunTest(const FString& Parameters)
 		FPaths::Combine(BaseDir, TEXT("Private/BehaviorTree/TrackerSquadNodes.cpp")),
 		FPaths::Combine(BaseDir, TEXT("Private/StealthSystem/Subsystems/SquadCoordinatorSubsystem/06_TrackerCoordination.inl"))};
 
-	for (const FString& TrackerFile : TrackerFiles)
+	for (const FString &TrackerFile : TrackerFiles)
 	{
 		TArray<FString> Lines;
 		if (FFileHelper::LoadFileToStringArray(Lines, *TrackerFile))
@@ -765,7 +765,7 @@ bool FRefactoredReadabilityAuditTest::RunTest(const FString& Parameters)
 			const FString CleanName = FPaths::GetCleanFilename(TrackerFile);
 			int32 ActiveLines = 0;
 			int32 CommentLines = 0;
-			for (const FString& Line : Lines)
+			for (const FString &Line : Lines)
 			{
 				const FString Trimmed = Line.TrimStartAndEnd();
 				if (Trimmed.IsEmpty())
