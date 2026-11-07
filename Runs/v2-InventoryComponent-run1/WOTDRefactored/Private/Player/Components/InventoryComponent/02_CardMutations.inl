@@ -8,12 +8,35 @@ FCardItem UInventory::AddCardToInventory_Implementation(const FCardItem& Card)
 		return {};
 	}
 
+	ConsumePendingRefillCharge(Card);
+
+	PlaceCardInWheelOrReserve(Card);
+
+	// GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple,
+	//     FString::Printf(TEXT("CardAdded: CurrentSlotIndex = %d, SlotOrder.Num() = %d"),
+	//     CurrentSlotIndex, SlotOrder.Num()));
+	OnCardAdded.Broadcast(Card);
+	OnCardSelected.Broadcast(CurrentSlotIndex);
+
+	// #if UE_BUILD_DEBUG
+	// GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
+	// FString::Printf(TEXT("%s added to inventory!"), *Card.CardName.ToString()));
+	// #endif
+
+	return Card;
+}
+
+void UInventory::ConsumePendingRefillCharge(const FCardItem& Card)
+{
 	if (FPendingCardRefill* Pending = PendingRefills.Find(Card.AbilityClass))
 	{
 		if (--Pending->MissingCharges <= 0)
 			PendingRefills.Remove(Card.AbilityClass);
 	}
+}
 
+void UInventory::PlaceCardInWheelOrReserve(const FCardItem& Card)
+{
 	if (CardCopyCounts.Contains(Card.AbilityClass))
 	{
 		// Stack already exists, just increment the copy count
@@ -41,19 +64,6 @@ FCardItem UInventory::AddCardToInventory_Implementation(const FCardItem& Card)
 			CurrentSlotIndex = 0;
 		}
 	}
-
-	// GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple,
-	//     FString::Printf(TEXT("CardAdded: CurrentSlotIndex = %d, SlotOrder.Num() = %d"),
-	//     CurrentSlotIndex, SlotOrder.Num()));
-	OnCardAdded.Broadcast(Card);
-	OnCardSelected.Broadcast(CurrentSlotIndex);
-
-	// #if UE_BUILD_DEBUG
-	// GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
-	// FString::Printf(TEXT("%s added to inventory!"), *Card.CardName.ToString()));
-	// #endif
-
-	return Card;
 }
 
 FCardItem UInventory::RemoveSelectedCard()
@@ -81,35 +91,45 @@ FCardItem UInventory::RemoveSelectedCard()
 
 	if (RemovedCard.RefillType == ECardRefillType::Automatic && !bIsRecycling)
 	{
-		FPendingCardRefill& Pending = PendingRefills.FindOrAdd(SelectedClass);
-		if (Pending.MissingCharges == 0)
-		{
-			Pending.Card = RemovedCard;
-			Pending.RemainingTime =
-				FMath::IsFinite(RemovedCard.RefillInterval) ? FMath::Max(0.1f, RemovedCard.RefillInterval) : 10.f;
-		}
-		++Pending.MissingCharges;
+		ScheduleAutoRefill(SelectedClass, RemovedCard);
 	}
 
 	// If no copies remain, remove the slot entirely
 	if (CardCopyCounts[SelectedClass] <= 0)
 	{
-		CardCopyCounts.Remove(SelectedClass);
-		CardData.Remove(SelectedClass);
-		SlotOrder.Remove(SelectedClass);
-
-		// Adjust selection index
-		if (SlotOrder.IsEmpty())
-		{
-			CurrentSlotIndex = 0;
-		}
-		else if (CurrentSlotIndex >= SlotOrder.Num())
-		{
-			CurrentSlotIndex = SlotOrder.Num() - 1;
-		}
+		RemoveSlotAndClampSelection(SelectedClass);
 	}
 
 	OnCardRemoved.Broadcast(RemovedCard);
 	OnCardSelected.Broadcast(CurrentSlotIndex);
 	return RemovedCard;
+}
+
+void UInventory::ScheduleAutoRefill(const TSubclassOf<UGSCGameplayAbility>& SelectedClass, const FCardItem& RemovedCard)
+{
+	FPendingCardRefill& Pending = PendingRefills.FindOrAdd(SelectedClass);
+	if (Pending.MissingCharges == 0)
+	{
+		Pending.Card = RemovedCard;
+		Pending.RemainingTime =
+			FMath::IsFinite(RemovedCard.RefillInterval) ? FMath::Max(0.1f, RemovedCard.RefillInterval) : 10.f;
+	}
+	++Pending.MissingCharges;
+}
+
+void UInventory::RemoveSlotAndClampSelection(const TSubclassOf<UGSCGameplayAbility>& SelectedClass)
+{
+	CardCopyCounts.Remove(SelectedClass);
+	CardData.Remove(SelectedClass);
+	SlotOrder.Remove(SelectedClass);
+
+	// Adjust selection index
+	if (SlotOrder.IsEmpty())
+	{
+		CurrentSlotIndex = 0;
+	}
+	else if (CurrentSlotIndex >= SlotOrder.Num())
+	{
+		CurrentSlotIndex = SlotOrder.Num() - 1;
+	}
 }

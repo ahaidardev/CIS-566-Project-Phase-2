@@ -167,4 +167,18 @@ class WOTDREFACTORED_API UInventory : public UActorComponent, public IBPI_Abilit
 
 	class AAliCharacter* OwnerChar;
 	class UGSCAbilitySystemComponent* ASC;
+
+	void ConsumePendingRefillCharge(const FCardItem& Card);
+	void PlaceCardInWheelOrReserve(const FCardItem& Card);
+	void ScheduleAutoRefill(const TSubclassOf<UGSCGameplayAbility>& SelectedClass, const FCardItem& RemovedCard);
+	void RemoveSlotAndClampSelection(const TSubclassOf<UGSCGameplayAbility>& SelectedClass);
+	FPendingCardRefill* GrantDueRefillCharges(FPendingCardRefill* Pending, const TSubclassOf<UGSCGameplayAbility>& Key);
+	void MoveEquippedStackToReserve(const TSubclassOf<UGSCGameplayAbility>& EquippedClass);
+	void EquipReserveStack(const TSubclassOf<UGSCGameplayAbility>& ReserveClass, int32 ReserveCount,
+						   const FCardItem& ReserveData);
+	void TearDownCardWidgets();
+	void AcquireCardWheel(class APlayerController* Controller);
+	void UpdateInventoryPanel(class APlayerController* Controller, bool bInventoryKeyDown);
+	void UpdateHandLayoutToggle(class APlayerController* Controller);
+	void UpdateWheelInputAndAnimation(class APlayerController* Controller, bool bWheelHeld);
 };
