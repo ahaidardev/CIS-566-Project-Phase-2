@@ -47,26 +47,36 @@ void ATrackerEnemy::BindTrackerPerception()
 	UnbindTrackerPerception();
 	if (!GetController())
 		return;
-	TrackerSuspicion = FindComponentByClass<UModularSuspicionComponent>();
-	if (TrackerSuspicion.IsValid())
-		TrackerSuspicion->OnSuspicionColorChanged.AddUniqueDynamic(this, &ATrackerEnemy::OnTrackerSuspicionChanged);
-	if (TrackerSuspicion.IsValid())
-		TrackerSuspicion->OnTargetIdentifiedEvent.AddUniqueDynamic(this, &ATrackerEnemy::OnTrackerPlayerIdentified);
+	BindTrackerSuspicion();
 	TrackerPerception = GetController()->FindComponentByClass<UAIPerceptionComponent>();
 	TrackerPawnSensing = GetController()->FindComponentByClass<UPawnSensingComponent>();
 	if (TrackerPerception.IsValid())
 	{
 		TrackerPerception->OnTargetPerceptionUpdated.AddUniqueDynamic(this, &ATrackerEnemy::OnTrackerPerceptionUpdated);
-		TArray<AActor*> SeenActors;
-		TrackerPerception->GetCurrentlyPerceivedActors(UAISense_Sight::StaticClass(), SeenActors);
-		for (AActor* Actor : SeenActors)
-		{
-			OnTrackerPerceptionUpdated(
-				Actor, FAIStimulus(*GetDefault<UAISense_Sight>(), 1.0f, Actor->GetActorLocation(), GetActorLocation()));
-		}
+		ReplayCurrentlySeenActors();
 	}
 	if (TrackerPawnSensing.IsValid())
 		TrackerPawnSensing->OnHearNoise.AddUniqueDynamic(this, &ATrackerEnemy::OnTrackerPawnNoise);
+}
+
+void ATrackerEnemy::BindTrackerSuspicion()
+{
+	TrackerSuspicion = FindComponentByClass<UModularSuspicionComponent>();
+	if (TrackerSuspicion.IsValid())
+		TrackerSuspicion->OnSuspicionColorChanged.AddUniqueDynamic(this, &ATrackerEnemy::OnTrackerSuspicionChanged);
+	if (TrackerSuspicion.IsValid())
+		TrackerSuspicion->OnTargetIdentifiedEvent.AddUniqueDynamic(this, &ATrackerEnemy::OnTrackerPlayerIdentified);
+}
+
+void ATrackerEnemy::ReplayCurrentlySeenActors()
+{
+	TArray<AActor*> SeenActors;
+	TrackerPerception->GetCurrentlyPerceivedActors(UAISense_Sight::StaticClass(), SeenActors);
+	for (AActor* Actor : SeenActors)
+	{
+		OnTrackerPerceptionUpdated(
+			Actor, FAIStimulus(*GetDefault<UAISense_Sight>(), 1.0f, Actor->GetActorLocation(), GetActorLocation()));
+	}
 }
 
 void ATrackerEnemy::OnTrackerPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
@@ -121,16 +131,23 @@ void ATrackerEnemy::HandleNoiseLead(AActor* Source, const FVector& Location)
 {
 	if (!GetWorld() || Source == this || (Source && Source->IsA<AABaseEnemy>()))
 		return;
-	for (const TWeakObjectPtr<AActor>& Player : VisiblePlayers)
-	{
-		if (Player.IsValid())
-			return;
-	}
+	if (HasVisiblePlayer())
+		return;
 	const double Now = GetWorld()->GetTimeSeconds();
 	if (Now - LastNoisePingTime < FMath::Max(0.0f, NoisePingCooldown))
 		return;
 	if (PingTarget(Location))
 		LastNoisePingTime = Now;
+}
+
+bool ATrackerEnemy::HasVisiblePlayer()
+{
+	for (const TWeakObjectPtr<AActor>& Player : VisiblePlayers)
+	{
+		if (Player.IsValid())
+			return true;
+	}
+	return false;
 }
 
 void ATrackerEnemy::OnTrackerPlayerIdentified(AActor* Player)

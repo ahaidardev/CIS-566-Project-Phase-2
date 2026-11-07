@@ -25,7 +25,10 @@ class WOTDREFACTORED_API ATrackerEnemy : public AABaseEnemy
 
   private:
 	void BindTrackerPerception();
+	void BindTrackerSuspicion();
+	void ReplayCurrentlySeenActors();
 	void UnbindTrackerPerception();
+	bool HasVisiblePlayer();
 	void HandleNoiseLead(AActor* Source, const FVector& Location);
 	bool IsSuspicious() const;
 	void TryPlayerSightLead(AActor* Player, const FVector& Location);
