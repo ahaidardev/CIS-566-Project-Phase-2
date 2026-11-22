@@ -2,23 +2,23 @@
 
 Fill this in for every run. Keep the criteria the same for development and final evaluation runs.
 
-**Run:** <folder name, e.g. v2-TrackerEnemy-run1>
-**Model + version:** 
-**Date:** 
-**Guide version:** 
-**Class / files in focus:** 
+**Run:** v2-AliCharacter-run1
+**Model + version:** Sol 6.1 (per Git history)
+**Date:** 2026-11-07 (run commit)
+**Guide version:** v2
+**Class / files in focus:** AliCharacter â€” class source and header, unchanged
 
 | # | Criterion | Result | Notes |
 |---|---|---|---|
-| 1 | Compiles (full project build) | Y / N | |
-| 2 | Behavior preserved (automation tests + own test cases pass) | Y / N | Tests run: |
-| 3 | Correct opportunity (vs. ground truth) | Y / Partial / N | |
-| 4 | Complexity (Lizard CCN of refactored methods) | before ___ / after ___ | |
-| 5 | Method length (Lizard NLOC) | before ___ / after ___ | |
-| 6 | Unrequested changes (renames, reformatting, logic, macros, extra header edits) | Y / N | |
-| 7 | Header changes limited to private helper declarations | Y / N | |
-| 8 | Report accurate (matches `git diff`) | Y / N | |
+| 1 | Compiles (full project build) | Blocked | Full editor build refused while Live Coding was active. See AliCharacter-build.log. |
+| 2 | Behavior preserved (automation tests + own test cases pass) | Unverified | Class test could not run because the full build was blocked. |
+| 3 | Correct opportunity (vs. ground truth) | Unverified | No independently labeled ground truth located. Run left the source unchanged. |
+| 4 | Complexity (Lizard CCN of refactored methods) | N/A | Lizard 1.26.1. Original methods only. |
+| 5 | Method length (Lizard NLOC) | N/A | Lizard 1.26.1. Original methods only. |
+| 6 | Unrequested changes (renames, reformatting, logic, macros, extra header edits) | N | No source diff. |
+| 7 | Header changes limited to private helper declarations | Y | Header unchanged. |
+| 8 | Report accurate (matches `git diff`) | Y | Git confirms unchanged source. |
 
-**Helpers added:** 
-**Failure types seen (FT IDs, add FT13+ for new ones):** 
-**Other notes:** 
+**Helpers added:** None
+**Failure types seen (FT IDs, add FT13+ for new ones):** No FT ID assigned from source review.
+**Other notes:** Git comparison: ffe830c â†’ ebbeb2f. Unreal logs: C:\Users\aamir\Documents\WolfOfTheDesert\WolfOFTheDesertRefactored\Saved\RefactorRunScoring.
